@@ -14,6 +14,9 @@
 /* Defines */
 #define LCD_ADDRESS 0x3C
 
+/* Globals */
+static uint8_t data[8];
+
 /* Prototypes */
 void LCD_Init(void);
 

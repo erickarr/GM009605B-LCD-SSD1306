@@ -24,8 +24,8 @@ typedef enum
 
 typedef enum
 {
-	CMD = 0U,
-	DATA
+	CMD = 0x00U,
+	DATA = 0x70U
 }CommandDataPkt;
 
 /* Function prototypes */

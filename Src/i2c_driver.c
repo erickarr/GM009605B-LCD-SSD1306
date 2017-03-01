@@ -12,6 +12,8 @@ void i2c_start(uint8_t address, WriteReadMode mode)
 {
 	//Write the start bit in I2C_CR1
 	//NOTE CR1 should not be written when any of START, STOP OR PEC bits are set
+	while(0 != (hi2c1.Instance->CR1&0x1300)) { }
+
 	hi2c1.Instance->CR1 |= I2C_CR1_START;
 
 	//The master waits for a read of SR1
@@ -34,16 +36,17 @@ void i2c_write(uint8_t address, CommandDataPkt pktType, uint8_t * data, uint8_t 
 
 	i2c_start(address, WRITE_MODE);
 
-	//TODO prepend a data byte for a command or data packet
-
 	//Ensure that we are in transmission mode
 	if(I2C_SR2_TRA == (hi2c1.Instance->SR2&I2C_SR2_TRA_Msk))
 	{
+		//The first byte sent out, should be the command or data packet
+		hi2c1.Instance->DR = pktType;
+
 		//Data is shifted out through DR
 		for(i = 0; i < length; i++)
 		{
-			//Push data onto DR if TxE is set
-			while(~I2C_SR1_TXE == (hi2c1.Instance->SR1&I2C_SR1_TXE_Msk));
+			//Push data onto DR if TxE is set - AKA wait for previous data to be sent
+			while(I2C_SR1_TXE != (hi2c1.Instance->SR1&I2C_SR1_TXE_Msk));
 
 			hi2c1.Instance->DR = data[i];
 
@@ -63,5 +66,10 @@ void i2c_stop()
 	while((I2C_SR1_TXE != (hi2c1.Instance->SR1&I2C_SR1_TXE_Msk)) && (I2C_SR1_BTF != (hi2c1.Instance->SR1&I2C_SR1_BTF_Msk))) { }
 
 	//Generate the stop condition
+	while(0 != (hi2c1.Instance->CR1&0x1300)) { }
+
 	hi2c1.Instance->CR1 = I2C_CR1_STOP;
+
+	//Read the stop bit from CR1
+	//while(I2C_SR1_STOPF != (hi2c1.Instance->SR1&I2C_SR1_STOPF))
 }

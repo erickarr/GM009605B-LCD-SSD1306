@@ -49,7 +49,6 @@
 extern I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN Private defines */
-#define LCD_ADDR 0x3C
 
 /* USER CODE END Private defines */
 
